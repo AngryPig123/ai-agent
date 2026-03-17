@@ -2,6 +2,7 @@ from dataclasses import dataclass
 
 from sqlalchemy import DateTime
 
+
 @dataclass
 class BlogPost:
     id: int

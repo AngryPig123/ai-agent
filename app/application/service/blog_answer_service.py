@@ -2,7 +2,7 @@ from app.application.port.out.blog_post_chunk_query_port import BlogPostChunkQue
 from app.application.port.out.blog_post_query_port import BlogPostQueryPort
 from app.application.port.out.embed_port import EmbedPort
 from app.application.port.out.llm_port import LLMPort
-from app.application.usecase.sync_blog_answer_usecase import UserAnswerUseCase
+from app.application.port.out.sync_blog_answer_usecase import UserAnswerUseCase
 
 
 class BlogAnswerService(UserAnswerUseCase):

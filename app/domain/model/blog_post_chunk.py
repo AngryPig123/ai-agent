@@ -8,4 +8,3 @@ class BlogPostChunk:
     title: str
     chunk_index: int
     score: float | None = None
-

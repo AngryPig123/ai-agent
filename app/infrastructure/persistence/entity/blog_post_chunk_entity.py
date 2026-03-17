@@ -1,8 +1,9 @@
-from sqlalchemy import Integer, String, Text
-from sqlalchemy.orm import Mapped, mapped_column
 from pgvector.sqlalchemy import VECTOR
+from sqlalchemy import Integer, String
+from sqlalchemy.orm import Mapped, mapped_column
 
 from app.infrastructure.db import Base
+
 
 class BlogPostChunkEntity(Base):
     __tablename__ = "blog_post_chunk"

@@ -2,8 +2,8 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from app.application.service.blog_answer_service import BlogAnswerService
-from app.infrastructure.adapter.embed.ollama_embed_adapter import OllamaEmbedAdapter
-from app.infrastructure.adapter.llm.ollama_llm_adapter import OllamaLLMAdapter
+from app.adapter.outbound.embed.ollama_embed_adapter import OllamaEmbedAdapter
+from app.adapter.outbound.llm.ollama_llm_adapter import OllamaLLMAdapter
 from app.infrastructure.persistence.repository.blog_post_chunk_repository import BlogPostChunkRepository
 from app.infrastructure.persistence.repository.blog_post_repository import BlogPostRepository
 
