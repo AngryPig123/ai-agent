@@ -1,6 +1,6 @@
 import requests
 
-from app.application.port.out.llm_port import LLMPort
+from app.application.port.outbound.llm_port import LLMPort
 
 
 class OllamaLLMAdapter(LLMPort):

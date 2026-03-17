@@ -1,7 +1,7 @@
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.application.port.out.blog_post_chunk_query_port import BlogPostChunkQueryPort
+from app.application.port.outbound.blog_post_chunk_query_port import BlogPostChunkQueryPort
 from app.domain.model.blog_post_chunk import BlogPostChunk
 from app.infrastructure.persistence.entity.blog_post_chunk_entity import BlogPostChunkEntity
 

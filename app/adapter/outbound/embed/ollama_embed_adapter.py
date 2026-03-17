@@ -1,6 +1,6 @@
 import requests
 
-from app.application.port.out.embed_port import EmbedPort
+from app.application.port.outbound.embed_port import EmbedPort
 
 
 class OllamaEmbedAdapter(EmbedPort):

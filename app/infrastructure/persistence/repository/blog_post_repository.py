@@ -1,7 +1,7 @@
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.application.port.out.blog_post_query_port import BlogPostQueryPort
+from app.application.port.outbound.blog_post_query_port import BlogPostQueryPort
 from app.domain.model.blog_post import BlogPost
 from app.infrastructure.persistence.entity.blog_post_entity import BlogPostEntity
 
