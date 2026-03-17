@@ -4,7 +4,7 @@ from pgvector.sqlalchemy import VECTOR
 
 from app.infrastructure.db import Base
 
-class BlogChunkEntity(Base):
+class BlogPostChunkEntity(Base):
     __tablename__ = "blog_post_chunk"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
