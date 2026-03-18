@@ -4,18 +4,16 @@ from app.adapter.inbound.base_tool import BaseTool, ToolContext, ToolResult
 from app.application.port.outbound.blog_post_chunk_query_port import BlogPostChunkQueryPort
 from app.application.port.outbound.blog_post_query_port import BlogPostQueryPort
 from app.application.port.outbound.embed_port import EmbedPort
+from app.application.service.prompt.prompt_builder import PromptBuilder
 
 
 class SearchBlogTool(BaseTool):
     name = "search_blog"
     description = "블로그 게시글 조회"
 
-    def __init__(
-            self,
-            blog_post_chunk_query_port: BlogPostChunkQueryPort,
-            blog_post_query_port: BlogPostQueryPort,
-            embed: EmbedPort,
-    ):
+    def __init__(self, blog_post_chunk_query_port: BlogPostChunkQueryPort, blog_post_query_port: BlogPostQueryPort,
+                 embed: EmbedPort, prompt_builder: PromptBuilder):
+        super().__init__(prompt_builder)
         self.blog_post_chunk_query_port = blog_post_chunk_query_port
         self.blog_post_query_port = blog_post_query_port
         self.embed = embed
@@ -53,8 +51,8 @@ class SearchBlogTool(BaseTool):
                 "description": post.description,
                 "source_path": post.source_path,
                 "tags_json": post.tags_json,
+                "content": post.content
             }
             for post in posts
         ]
-
         return ToolResult(success=True, data={"posts": result})

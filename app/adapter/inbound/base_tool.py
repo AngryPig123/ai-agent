@@ -2,6 +2,8 @@ from abc import ABC
 from dataclasses import dataclass
 from typing import Any
 
+from app.application.service.prompt.prompt_builder import PromptBuilder
+
 
 @dataclass
 class ToolContext:
@@ -21,6 +23,9 @@ class ToolResult:
 class BaseTool(ABC):
     name: str = ""
     description = ""
+
+    def __init__(self, prompt_builder: PromptBuilder):
+        self.prompt_builder = prompt_builder
 
     def execute(self, input_data: dict[str, Any], context: ToolContext) -> ToolResult:
         error = self.validate(input_data)
