@@ -1,6 +1,6 @@
 from typing import Any
 
-from app.adapter.inbound.base_tool import BaseTool, ToolContext, ToolResult
+from app.application.tool.base_tool import BaseTool, ToolContext, ToolResult
 from app.application.port.outbound.blog_post_chunk_query_port import BlogPostChunkQueryPort
 from app.application.port.outbound.blog_post_query_port import BlogPostQueryPort
 from app.application.port.outbound.embed_port import EmbedPort

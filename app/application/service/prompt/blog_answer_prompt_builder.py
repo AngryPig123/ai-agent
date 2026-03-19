@@ -1,7 +1,7 @@
 from app.application.service.prompt.prompt_builder import PromptBuilder
 
 
-class SearchBlogPromptBuilder(PromptBuilder):
+class BlogAnswerPromptBuilder(PromptBuilder):
     def build(self, question: str, references: list[dict]) -> str:
         return f"""
                 너는 블로그 글을 기반으로 질문에 답변하는 AI 도우미다.

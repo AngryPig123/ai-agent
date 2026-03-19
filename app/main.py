@@ -1,11 +1,11 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from app.adapter.inbound.search_blog_tool import SearchBlogTool
+from app.application.tool.search_blog_tool import SearchBlogTool
 from app.application.service.blog_answer_service import BlogAnswerService
 from app.adapter.outbound.embed.ollama_embed_adapter import OllamaEmbedAdapter
 from app.adapter.outbound.llm.ollama_llm_adapter import OllamaLLMAdapter
-from app.application.service.prompt.blog_answer_prompt_builder import SearchBlogPromptBuilder
+from app.application.service.prompt.blog_answer_prompt_builder import BlogAnswerPromptBuilder
 from app.infrastructure.persistence.repository.blog_post_chunk_repository import BlogPostChunkRepository
 from app.infrastructure.persistence.repository.blog_post_repository import BlogPostRepository
 
@@ -26,7 +26,7 @@ def main() -> None:
             embed=embed,
         )
 
-        prompt_builder = SearchBlogPromptBuilder()
+        prompt_builder = BlogAnswerPromptBuilder()
 
         blog_answer_service = BlogAnswerService(
             search_blog_tool=search_blog_tool,

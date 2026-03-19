@@ -1,9 +1,9 @@
 import uuid
-from app.adapter.inbound.base_tool import ToolContext
-from app.adapter.inbound.search_blog_tool import SearchBlogTool
+from app.application.tool.base_tool import ToolContext
+from app.application.tool.search_blog_tool import SearchBlogTool
 from app.application.port.inbound.sync_blog_answer_usecase import UserAnswerUseCase
 from app.application.port.outbound.llm_port import LLMPort
-from app.application.service.prompt.blog_answer_prompt_builder import SearchBlogPromptBuilder
+from app.application.service.prompt.blog_answer_prompt_builder import BlogAnswerPromptBuilder
 
 
 class BlogAnswerService(UserAnswerUseCase):
@@ -11,8 +11,9 @@ class BlogAnswerService(UserAnswerUseCase):
     def __init__(
             self,
             search_blog_tool: SearchBlogTool,
+            summarize_context_tool: SummarizeContextTool,
             llm: LLMPort,
-            prompt_builder: SearchBlogPromptBuilder,
+            prompt_builder: BlogAnswerPromptBuilder,
     ):
         self.search_blog_tool = search_blog_tool
         self.llm = llm
