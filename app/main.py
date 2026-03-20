@@ -36,7 +36,6 @@ def main() -> None:
         )
 
         blog_answer_service = BlogAnswerService(
-            llm=llm,
             search_blog_tool=search_blog_tool,
             answer_draft_tool=answer_draft_tool,
             summarize_context_tool=summarize_context_tool,
