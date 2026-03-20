@@ -4,6 +4,7 @@ from sqlalchemy.orm import sessionmaker
 from app.adapter.outbound.embed.ollama_embed_adapter import OllamaEmbedAdapter
 from app.adapter.outbound.llm.ollama_llm_adapter import OllamaLLMAdapter
 from app.application.service.blog_answer_service import BlogAnswerService
+from app.application.tool.answer_draft_tool import AnswerDraftTool
 from app.application.tool.search_blog_tool import SearchBlogTool
 from app.application.tool.summarize_context_tool import SummarizeContextTool
 from app.infrastructure.persistence.repository.blog_post_chunk_repository import BlogPostChunkRepository
@@ -30,10 +31,15 @@ def main() -> None:
             llm=llm
         )
 
-        blog_answer_service = BlogAnswerService(
-            search_blog_tool=search_blog_tool,
-            summarize_context_tool=summarize_context_tool,
+        answer_draft_tool = AnswerDraftTool(
             llm=llm
+        )
+
+        blog_answer_service = BlogAnswerService(
+            llm=llm,
+            search_blog_tool=search_blog_tool,
+            answer_draft_tool=answer_draft_tool,
+            summarize_context_tool=summarize_context_tool,
         )
 
         answer = blog_answer_service.execute("헥사고날 아키텍처가 뭐야?")

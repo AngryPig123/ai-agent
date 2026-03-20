@@ -1,7 +1,6 @@
 import uuid
 
 from app.application.port.inbound.sync_blog_answer_usecase import UserAnswerUseCase
-from app.application.port.outbound.llm_port import LLMPort
 from app.application.tool.answer_draft_tool import AnswerDraftTool
 from app.application.tool.base_tool import ToolContext
 from app.application.tool.search_blog_tool import SearchBlogTool
@@ -12,12 +11,10 @@ class BlogAnswerService(UserAnswerUseCase):
 
     def __init__(
             self,
-            llm: LLMPort,
             search_blog_tool: SearchBlogTool,
             answer_draft_tool: AnswerDraftTool,
             summarize_context_tool: SummarizeContextTool,
     ):
-        self.llm = llm
         self.search_blog_tool = search_blog_tool
         self.answer_draft_tool = answer_draft_tool
         self.summarize_context_tool = summarize_context_tool
@@ -48,7 +45,9 @@ class BlogAnswerService(UserAnswerUseCase):
         }
 
         answer_draft_tool_result = self.answer_draft_tool.execute(
-            input_data=input_data,
+            input_data={
+                "query": input_data
+            },
             context=context
         )
 

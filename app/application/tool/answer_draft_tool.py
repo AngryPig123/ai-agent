@@ -63,4 +63,4 @@ class AnswerDraftTool(BaseTool):
         query = input_data.get("query")
         prompt = prompt_builder(query["question"], query["references"], query["summary"])
         answer = self.llm.generate(prompt)
-        return ToolResult(success=True, data=answer)
+        return ToolResult(success=True, data={"answer": answer})
