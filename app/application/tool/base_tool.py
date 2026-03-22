@@ -19,19 +19,23 @@ class ToolResult:
 
 
 class BaseTool(ABC):
+
+    #   registry에서 식별할 고유 이름
     name: str = ""
+
+    #   사람이 읽는 설명
     description = ""
 
     #   tool이 실행되기 위한 상태 키 목록
-    requires: list[str] = []
+    requires: tuple[str, ...] = ()
 
-    #   tool이 실행 후 제공하는 상태 키 목록
-    provides: list[str] = []
+    #   tool이 성공하면 state에 채워줄 키
+    provides: tuple[str, ...] = ()
 
-    #   tool이 실행된 후 흐름을 종료해도 되는지 여부
-    is_terminal: bool = True
+    #   tool 결과가 최종 산출물인지 여부
+    is_terminal: bool = False
 
-    def execute(self, state: dict[str, Any], context: ToolContext) :
+    def execute(self, state: dict[str, Any], context: ToolContext) ->tuple[ToolResult, dict[str, Any]]:
         if not self.can_handle(state):
             return ToolResult(success=False, error="cannot handle"), state
 
@@ -54,14 +58,8 @@ class BaseTool(ABC):
     def run(self, input_data: dict[str, Any], context: ToolContext) -> ToolResult:
         pass
 
-    def can_handle(self, state: dict[str, Any]) -> bool:
-        return all(
-            key in state and state[key] is not None
-            for key in self.requires
-        )
-
     #   현재 Tool이 실행 가능한 생태인지 판단
-    def can_handler(self, state: dict[str, Any]) -> bool:
+    def can_handle(self, state: dict[str, Any]) -> bool:
         return all(
             key in state and state[key] is not None
             for key in self.requires

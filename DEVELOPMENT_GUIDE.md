@@ -429,4 +429,37 @@ tool이 있지만 service가 다 제어하고 있다.
 - 그 다음 `service orchestration`
 - 그리고 테스트
 
-이 순서로 가면 구조가 훨씬 단단해진다.
+
+  이 대화에서 정리된 수정 방향은 꽤 명확해졌다. 각 tool 구현체는 지금 app/application/tool/summarize_context_tool.py, app/
+  application/tool/search_blog_tool.py, app/application/tool/answer_draft_tool.py 에서처럼 build_input(state)로 공용 state에서
+  필요한 값만 추출하고, run(input_data, context)는 state를 모르도록 유지하는 방향이 맞다. 즉, tool은 state 전체를 직접 수정하지
+  않고, 실행 결과만 ToolResult로 내보내고, state 반영은 update_state()를 통해 일관되게 처리하는 게 맞다는 점이 정리됐다. 서비스
+  는 그 결과를 받아 다음 tool에 넘길 state를 갱신하는 orchestrator 역할을 해야 한다는 것도 분명해졌다.
+
+  개선된 점은 개념적 경계가 정리된 것이다. build_input()는 “state에서 필요한 입력만 꺼내는 역할”, run()은 “순수 실행 역할”,
+  update_state()는 “결과를 공용 state에 반영하는 역할”로 이해가 맞춰졌다. 그리고 app/application/service/blog_answer_service.py
+  의 서비스 코드도, 네가 마지막에 적은 형태처럼 각 tool의 execute() 결과를 순차적으로 받아 다음 state로 넘기는 패턴이 현재 설계
+  와 일치한다는 점이 확인됐다. 다만 여기에는 반드시 result.success 검사와 실패 시 중단 로직이 들어가야 한다는 보완점도 같이 드
+  러났다.
+
+  현재 작성된 코드를 기준으로 보면 아직 남아 있는 문제도 있다. app/application/tool/base_tool.py 는 execute()가 튜플을 반환하는
+  구조로 가고 있는데, 그렇다면 이 패턴을 전체 코드에서 일관되게 유지해야 한다. is_terminal 기본값이 True인 것도 현재 단계에서는
+  부적절하고, can_handle()와 can_handler()가 중복되어 있는 점도 정리 대상이다. app/application/service/blog_answer_service.py
+  는 지금 순차 전달 구조로 바뀌고 있지만, 아직은 tool 실패 처리, 빈 결과 처리, 최종 answer 보장 같은 방어 코드가 더 필요하다.
+  app/main.py 도 지금은 상태를 직접 만들고 서비스에 넘기는 수준이지만, 이후 registry/router를 붙이려면 조립 코드가 조금 더 명시
+  적으로 바뀌어야 한다.
+
+  동적 tool 선택을 위해 다음 단계로 구현해야 할 부분은 네 가지다. 첫째, app/application/tool/base_tool.py 에서 name, requires,
+  provides, is_terminal 같은 메타데이터를 안정적으로 정리해야 한다. 지금 일부 tool에는 들어가 있지만 전체적으로 계약을 더 분명
+  히 해야 한다. 둘째, ToolRegistry를 추가해 등록된 tool 목록과 lookup을 관리해야 한다. 이게 먼저 있어야 router가 선택 대상을 알
+  수 있다. 셋째, ToolRouter를 만들어 현재 state와 이미 실행한 tool 목록을 바탕으로 다음 tool을 고르는 규칙을 넣어야 한다. 처음
+  에는 rule-based면 충분하다. 예를 들면 question만 있으면 search_blog, blog_posts가 있으면 summarize_context, summary까지 있으
+  면 answer_draft를 고르는 방식이다. 넷째, app/application/service/blog_answer_service.py 를 고정 순서 실행자에서 “현재 state를
+  보고 router가 선택한 tool을 실행하는 루프”로 바꿔야 한다.
+
+  결국 이번 세션에서 정리된 개발 방향은 이렇다. 지금 프로젝트는 “tool을 순차 호출하는 구조”까지는 손이 닿았고, 그 과정에서
+  state 전달 방식과 tool 책임 경계가 정리됐다. 다음 단계는 그 순차 호출을 하드코딩하지 않고, registry에 등록된 tool들을 router
+  가 state 기반으로 선택하게 만드는 것이다. 순서로 적으면 BaseTool 계약 정리 -> 서비스 실패 처리 정리 -> ToolRegistry 구현 ->
+  ToolRouter 구현 -> BlogAnswerService를 router 기반 루프로 전환 -> 테스트 추가가 가장 자연스럽다. 원하면 다음 턴에서 이 기준으
+  로 현재 코드에 정확히 어떤 파일을 어떤 순서로 수정하면 되는지 실행 계획처럼 쪼개서 적어줄 수 있다.
+

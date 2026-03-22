@@ -45,6 +45,7 @@ class SummarizeContextTool(BaseTool):
     description = "블로그 게시글 조회"
     requires = ("blog_posts",)
     provides = ("summary",)
+    is_terminal = False
 
     def __init__(self, llm: LLMPort):
         self.llm = llm

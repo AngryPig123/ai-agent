@@ -11,6 +11,7 @@ class SearchBlogTool(BaseTool):
     description = "블로그 게시글 조회"
     requires = ("user_question",)
     provides = ("blog_posts",)
+    is_terminal = False
 
     def __init__(
             self,
