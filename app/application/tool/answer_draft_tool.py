@@ -50,17 +50,40 @@ def prompt_builder(question: str, references: list[dict], summary: str) -> str:
 
 class AnswerDraftTool(BaseTool):
 
+    name = "answer_drate"
+    description = "최종 답변 생성 툴"
+    requires = ("user_question","blog_posts","summary",)
+    provides = ("answer",)
+
     def __init__(self, llm: LLMPort):
         self.llm = llm
 
+    def build_input(self, state: dict[str, Any]) -> dict[str, Any]:
+        return {
+            "user_question": state["user_question"],
+            "blog_posts": state["blog_posts"],
+            "summary": state["summary"],
+        }
+
     def validate(self, input_data: dict[str, Any]) -> str | None:
-        posts = input_data.get("query")
-        if posts is None:
+        user_question = input_data["user_question"]
+        blog_posts = input_data["blog_posts"]
+        summary = input_data["summary"]
+        if summary is None:
+            return "요약 본문은 필수입니다."
+        if blog_posts is None:
+            return "요약 본문은 필수입니다."
+        if user_question is None:
             return "요약 본문은 필수입니다."
         return None
 
     def run(self, input_data: dict[str, Any], context: ToolContext) -> ToolResult:
-        query = input_data.get("query")
-        prompt = prompt_builder(query["question"], query["references"], query["summary"])
+
+        user_question = input_data["user_question"]
+        blog_posts = input_data["blog_posts"]
+        summary = input_data["summary"]
+
+        prompt = prompt_builder(user_question, blog_posts, summary)
         answer = self.llm.generate(prompt)
+
         return ToolResult(success=True, data={"answer": answer})

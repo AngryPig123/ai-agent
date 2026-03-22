@@ -1,8 +1,9 @@
 from abc import ABC, abstractmethod
+from typing import Any
 
 
 class UserAnswerUseCase(ABC):
 
     @abstractmethod
-    def execute(self, source_url) -> str:
+    def execute(self, state:dict[str,Any] ) -> str:
         pass

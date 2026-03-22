@@ -21,6 +21,10 @@ def main() -> None:
         llm = OllamaLLMAdapter("qwen2.5:7b")
         embed = OllamaEmbedAdapter("nomic-embed-text-v2-moe:latest")
 
+        state = {
+            "user_question":"헥사고날 아키텍처가 뭐야?"
+        }
+
         search_blog_tool = SearchBlogTool(
             blog_post_chunk_query_port=blog_post_chunk_query_port,
             blog_post_query_port=blog_post_query_port,
@@ -41,7 +45,7 @@ def main() -> None:
             summarize_context_tool=summarize_context_tool,
         )
 
-        answer = blog_answer_service.execute("헥사고날 아키텍처가 뭐야?")
+        answer = blog_answer_service.execute(state)
         print(answer)
 
 

@@ -40,24 +40,32 @@ def prompt_builder(contents: list[Any]) -> str:
 
 
 class SummarizeContextTool(BaseTool):
+
     name = "summarize_context"
     description = "블로그 게시글 조회"
+    requires = ("blog_posts",)
+    provides = ("summary",)
 
     def __init__(self, llm: LLMPort):
         self.llm = llm
 
+    def build_input(self, state: dict[str, Any]) -> dict[str, Any]:
+        return {
+            "blog_posts": state["blog_posts"]
+        }
+
     def validate(self, input_data: dict[str, Any]) -> str | None:
-        posts = input_data.get("query")
-        if posts is None:
-            return "요약 본문은 필수입니다."
-        if not isinstance(posts, list):
-            return "요약 본문은 리스트여야 합니다."
-        if len(posts) == 0:
-            return "요약 본문은 비어 있을 수 없습니다."
+        blog_posts = input_data.get("blog_posts")
+        if blog_posts is None:
+            return "blog_posts은 필수입니다."
+        if not isinstance(blog_posts, list):
+            return "blog_posts은 리스트여야 합니다."
+        if len(blog_posts) == 0:
+            return "blog_posts은 비어 있을 수 없습니다."
         return None
 
     def run(self, input_data: dict[str, Any], context: ToolContext) -> ToolResult:
-        posts = input_data.get("query")
-        prompt = prompt_builder([post['content'] for post in posts])
+        blog_posts = input_data.get("blog_posts")
+        prompt = prompt_builder([post['content'] for post in blog_posts])
         summary = self.llm.generate(prompt)
         return ToolResult(success=True, data={"summary": summary})

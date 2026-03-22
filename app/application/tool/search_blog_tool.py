@@ -9,6 +9,8 @@ from app.application.tool.base_tool import BaseTool, ToolContext, ToolResult
 class SearchBlogTool(BaseTool):
     name = "search_blog"
     description = "블로그 게시글 조회"
+    requires = ("user_question",)
+    provides = ("blog_posts",)
 
     def __init__(
             self,
@@ -20,19 +22,26 @@ class SearchBlogTool(BaseTool):
         self.blog_post_query_port = blog_post_query_port
         self.embed = embed
 
-    def validate(self, input_data: dict[str, Any]) -> str | None:
-        query = input_data.get("query")
+    def build_input(self, state: dict[str, Any]) -> dict[str, Any]:
+        return {
+            "user_question": state["user_question"]
+        }
 
-        if query is None:
-            return "query는 필수입니다."
-        if not isinstance(query, str):
-            return "query는 문자열이어야 합니다."
-        if not query.strip():
-            return "query는 비어 있을 수 없습니다."
+    def validate(self, input_data: dict[str, Any]) -> str | None:
+        user_question = input_data.get("user_question")
+
+        if user_question is None:
+            return "user_question는 필수입니다."
+        if not isinstance(user_question, str):
+            return "user_question는 문자열이어야 합니다."
+        if not user_question.strip():
+            return "user_question는 비어 있을 수 없습니다."
         return None
 
     def run(self, input_data: dict[str, Any], context: ToolContext) -> ToolResult:
-        query = input_data["query"].strip()
+
+        query = input_data["user_question"].strip()
+
         query_vector = self.embed.embed(text=query)
 
         chunks = self.blog_post_chunk_query_port.search_similar(
@@ -47,7 +56,7 @@ class SearchBlogTool(BaseTool):
 
         posts = self.blog_post_query_port.find_by_blog_post_ids(blog_ids)
 
-        result = [
+        blog_posts = [
             {
                 "title": post.title,
                 "description": post.description,
@@ -58,4 +67,7 @@ class SearchBlogTool(BaseTool):
             for post in posts
         ]
 
-        return ToolResult(success=True, data={"posts": result})
+        return ToolResult(
+            success=True,
+            data={"blog_posts": blog_posts}
+        )

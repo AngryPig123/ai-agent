@@ -1,4 +1,5 @@
 import uuid
+from typing import Any
 
 from app.application.port.inbound.sync_blog_answer_usecase import UserAnswerUseCase
 from app.application.tool.answer_draft_tool import AnswerDraftTool
@@ -19,7 +20,8 @@ class BlogAnswerService(UserAnswerUseCase):
         self.answer_draft_tool = answer_draft_tool
         self.summarize_context_tool = summarize_context_tool
 
-    def execute(self, text: str) -> str:
+    def execute(self, state:dict[str,Any]) -> str:
+
         context = ToolContext(
             agent_id="blog-answer-agent",
             session_id="blog-answer-session",
@@ -27,28 +29,19 @@ class BlogAnswerService(UserAnswerUseCase):
             trace_id=str(uuid.uuid4())
         )
 
-        search_blog_tool_result = self.search_blog_tool.execute(
-            input_data={"query": text},
+        self.search_blog_tool.execute(
+            state=state,
             context=context,
         )
-        blog_posts = search_blog_tool_result.data.get("posts", [])
 
-        summarize_context_tool_result = self.summarize_context_tool.execute(
-            input_data={"query": blog_posts},
-            context=context
-        )
-        summary = summarize_context_tool_result.data.get("summary")
-        input_data = {
-            "question": text,
-            "references": blog_posts,
-            "summary": summary
-        }
-
-        answer_draft_tool_result = self.answer_draft_tool.execute(
-            input_data={
-                "query": input_data
-            },
+        self.summarize_context_tool.execute(
+            state=state,
             context=context
         )
 
-        return answer_draft_tool_result.data.get("answer")
+        self.answer_draft_tool.execute(
+            state=state,
+            context=context
+        )
+
+        return state["answer"]
