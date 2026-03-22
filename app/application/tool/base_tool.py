@@ -19,7 +19,6 @@ class ToolResult:
 
 
 class BaseTool(ABC):
-
     #   registry에서 식별할 고유 이름
     name: str = ""
 
@@ -35,7 +34,7 @@ class BaseTool(ABC):
     #   tool 결과가 최종 산출물인지 여부
     is_terminal: bool = False
 
-    def execute(self, state: dict[str, Any], context: ToolContext) ->tuple[ToolResult, dict[str, Any]]:
+    def execute(self, state: dict[str, Any], context: ToolContext) -> tuple[ToolResult, dict[str, Any]]:
         if not self.can_handle(state):
             return ToolResult(success=False, error="cannot handle"), state
 

@@ -3,6 +3,8 @@ from sqlalchemy.orm import sessionmaker
 
 from app.adapter.outbound.embed.ollama_embed_adapter import OllamaEmbedAdapter
 from app.adapter.outbound.llm.ollama_llm_adapter import OllamaLLMAdapter
+from app.application.registry.tool_registry import ToolRegistry
+from app.application.router.tool.rule_based_tool_router import RuleBasedToolRouter
 from app.application.service.blog_answer_service import BlogAnswerService
 from app.application.tool.answer_draft_tool import AnswerDraftTool
 from app.application.tool.search_blog_tool import SearchBlogTool
@@ -22,7 +24,7 @@ def main() -> None:
         embed = OllamaEmbedAdapter("nomic-embed-text-v2-moe:latest")
 
         state = {
-            "user_question":"헥사고날 아키텍처가 뭐야?"
+            "user_question": "무엇을 학습하려는 블로그야?"
         }
 
         search_blog_tool = SearchBlogTool(
@@ -39,10 +41,16 @@ def main() -> None:
             llm=llm
         )
 
+        tool_registry = ToolRegistry()
+        tool_registry.register(search_blog_tool)
+        tool_registry.register(summarize_context_tool)
+        tool_registry.register(answer_draft_tool)
+
+        rule_based_tool_router = RuleBasedToolRouter(tool_registry=tool_registry)
+
         blog_answer_service = BlogAnswerService(
-            search_blog_tool=search_blog_tool,
-            answer_draft_tool=answer_draft_tool,
-            summarize_context_tool=summarize_context_tool,
+            tool_registry=tool_registry,
+            tool_router=rule_based_tool_router
         )
 
         answer = blog_answer_service.execute(state)

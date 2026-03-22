@@ -2,25 +2,22 @@ import uuid
 from typing import Any
 
 from app.application.port.inbound.sync_blog_answer_usecase import UserAnswerUseCase
-from app.application.tool.answer_draft_tool import AnswerDraftTool
+from app.application.registry.tool_registry import ToolRegistry
+from app.application.router.tool.base_tool_router import BaseToolRouter
 from app.application.tool.base_tool import ToolContext
-from app.application.tool.search_blog_tool import SearchBlogTool
-from app.application.tool.summarize_context_tool import SummarizeContextTool
 
 
 class BlogAnswerService(UserAnswerUseCase):
 
     def __init__(
             self,
-            search_blog_tool: SearchBlogTool,
-            answer_draft_tool: AnswerDraftTool,
-            summarize_context_tool: SummarizeContextTool,
+            tool_router: BaseToolRouter,
+            tool_registry: ToolRegistry
     ):
-        self.search_blog_tool = search_blog_tool
-        self.answer_draft_tool = answer_draft_tool
-        self.summarize_context_tool = summarize_context_tool
+        self.tool_router = tool_router
+        self.tool_registry = tool_registry
 
-    def execute(self, state:dict[str,Any]) -> str:
+    def execute(self, state: dict[str, Any]) -> str:
 
         context = ToolContext(
             agent_id="blog-answer-agent",
@@ -29,28 +26,22 @@ class BlogAnswerService(UserAnswerUseCase):
             trace_id=str(uuid.uuid4())
         )
 
-        search_blog_tool_result, search_blog_tool_state = self.search_blog_tool.execute(
-            state=state,
-            context=context,
-        )
+        executed_tools: set[str] = set()
 
-        if not search_blog_tool_result.success:
-            raise RuntimeError(search_blog_tool_result.error)
+        while True:
+            tool_name = self.tool_router.next_tool(state=state, executed_tools=executed_tools)
+            if tool_name is None:
+                break
 
-        summarize_context_tool_result,summarize_context_tool_state = self.summarize_context_tool.execute(
-            state=search_blog_tool_state,
-            context=context
-        )
+            tool = self.tool_registry.get(tool_name)
 
-        if not summarize_context_tool_result.success:
-            raise RuntimeError(summarize_context_tool_result.error)
+            result, state = tool.execute(state=state, context=context)
+            if not result.success:
+                raise RuntimeError(result.error)
 
-        answer_draft_tool_result, answer_draft_tool_state = self.answer_draft_tool.execute(
-            state=summarize_context_tool_state,
-            context=context
-        )
+            executed_tools.add(tool.name)
 
-        if not answer_draft_tool_result.success:
-            raise RuntimeError(answer_draft_tool_result.error)
+            if tool.is_terminal:
+                break
 
-        return answer_draft_tool_state["answer"]
+        return state["answer"]

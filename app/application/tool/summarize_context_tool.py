@@ -40,7 +40,6 @@ def prompt_builder(contents: list[Any]) -> str:
 
 
 class SummarizeContextTool(BaseTool):
-
     name = "summarize_context"
     description = "블로그 게시글 조회"
     requires = ("blog_posts",)

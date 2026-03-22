@@ -49,10 +49,9 @@ def prompt_builder(question: str, references: list[dict], summary: str) -> str:
 
 
 class AnswerDraftTool(BaseTool):
-
     name = "answer_draft"
     description = "최종 답변 생성 툴"
-    requires = ("user_question","blog_posts","summary",)
+    requires = ("user_question", "blog_posts", "summary",)
     provides = ("answer",)
     is_terminal = True
 
