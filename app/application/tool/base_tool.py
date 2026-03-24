@@ -1,9 +1,11 @@
-from abc import ABC
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Any
 
+from app.application.tool.agent_state import AgentState
 
-@dataclass
+
+@dataclass(frozen=True)
 class ToolContext:
     agent_id: str
     session_id: str
@@ -11,10 +13,10 @@ class ToolContext:
     trace_id: str
 
 
-@dataclass
+@dataclass(frozen=True)
 class ToolResult:
     success: bool
-    data: Any = None
+    data: dict[str, Any] | None = None
     error: str | None = None
 
 
@@ -23,7 +25,7 @@ class BaseTool(ABC):
     name: str = ""
 
     #   사람이 읽는 설명
-    description = ""
+    description: str = ""
 
     #   tool이 실행되기 위한 상태 키 목록
     requires: tuple[str, ...] = ()
@@ -34,7 +36,7 @@ class BaseTool(ABC):
     #   tool 결과가 최종 산출물인지 여부
     is_terminal: bool = False
 
-    def execute(self, state: dict[str, Any], context: ToolContext) -> tuple[ToolResult, dict[str, Any]]:
+    def execute(self, state: AgentState, context: ToolContext) -> tuple[ToolResult, AgentState]:
         if not self.can_handle(state):
             return ToolResult(success=False, error="cannot handle"), state
 
@@ -51,35 +53,34 @@ class BaseTool(ABC):
         new_state = self.update_state(state, result)
         return result, new_state
 
-    def validate(self, input_data: dict[str, Any]) -> str | None:
-        pass
+    def can_handle(self, state: AgentState) -> bool:
+        return all(state.has(key) for key in self.requires)
 
-    def run(self, input_data: dict[str, Any], context: ToolContext) -> ToolResult:
-        pass
-
-    #   현재 Tool이 실행 가능한 생태인지 판단
-    def can_handle(self, state: dict[str, Any]) -> bool:
-        return all(
-            key in state and state[key] is not None
+    def build_input(self, state: AgentState) -> dict[str, Any]:
+        result ={
+            key: state.get(key)
             for key in self.requires
-        )
-
-    #   공용 state에서 이 Tool이 실행에 필요한 입력만 추출
-    def build_input(self, state: dict[str, Any]) -> dict[str, Any]:
-        return {
-            key: state[key]
-            for key in self.requires
-            if key in state
         }
+        return result
 
-    #   Tool 실행 결과를 공용 state에 반영
-    def update_state(
-            self,
-            state: dict[str, Any],
-            result: ToolResult
-    ):
-        new_state = dict(state)
-        for key in self.provides:
-            if key in result.data:
-                new_state[key] = result.data[key]
-        return new_state
+    def update_state(self, state: AgentState, result: ToolResult) -> AgentState:
+        if not result.data:
+            return state
+
+        if not isinstance(result.data, dict):
+            return state
+
+        updates = {
+            key: result.data[key]
+            for key in self.provides
+            if key in result.data
+        }
+        return state.update(**updates)
+
+    @abstractmethod
+    def validate(self, input_data: dict[str, Any]) -> str | None:
+        return None
+
+    @abstractmethod
+    def run(self, input_data: dict[str, Any], context: ToolContext) -> ToolResult:
+        raise NotImplementedError

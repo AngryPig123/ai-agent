@@ -49,11 +49,6 @@ class SummarizeContextTool(BaseTool):
     def __init__(self, llm: LLMPort):
         self.llm = llm
 
-    def build_input(self, state: dict[str, Any]) -> dict[str, Any]:
-        return {
-            "blog_posts": state["blog_posts"]
-        }
-
     def validate(self, input_data: dict[str, Any]) -> str | None:
         blog_posts = input_data.get("blog_posts")
         if blog_posts is None:
@@ -66,6 +61,6 @@ class SummarizeContextTool(BaseTool):
 
     def run(self, input_data: dict[str, Any], context: ToolContext) -> ToolResult:
         blog_posts = input_data.get("blog_posts")
-        prompt = prompt_builder([post['content'] for post in blog_posts])
+        prompt = prompt_builder([post.content for post in blog_posts])
         summary = self.llm.generate(prompt)
         return ToolResult(success=True, data={"summary": summary})

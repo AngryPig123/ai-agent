@@ -4,12 +4,13 @@ from sqlalchemy.orm import sessionmaker
 from app.adapter.outbound.embed.ollama_embed_adapter import OllamaEmbedAdapter
 from app.adapter.outbound.llm.ollama_llm_adapter import OllamaLLMAdapter
 from app.application.orchestrator.tool_flow_orchestrator import ToolFlowOrchestrator
-from app.application.registry.tool_registry import ToolRegistry
-from app.application.router.tool.rule_based_tool_router import RuleBasedToolRouter
 from app.application.service.blog_answer_service import BlogAnswerService
+from app.application.tool.agent_state import AgentState
 from app.application.tool.answer_draft_tool import AnswerDraftTool
+from app.application.tool.rule_based_tool_router import RuleBasedToolRouter
 from app.application.tool.search_blog_tool import SearchBlogTool
 from app.application.tool.summarize_context_tool import SummarizeContextTool
+from app.application.tool.tool_registry import ToolRegistry
 from app.infrastructure.persistence.repository.blog_post_chunk_repository import BlogPostChunkRepository
 from app.infrastructure.persistence.repository.blog_post_repository import BlogPostRepository
 
@@ -24,9 +25,7 @@ def main() -> None:
         llm = OllamaLLMAdapter("qwen2.5:7b")
         embed = OllamaEmbedAdapter("nomic-embed-text-v2-moe:latest")
 
-        state = {
-            "user_question": "무엇을 학습하려는 블로그야?"
-        }
+        state = AgentState(user_question="무엇을 학습하려는 블로그야?")
 
         search_blog_tool = SearchBlogTool(
             blog_post_chunk_query_port=blog_post_chunk_query_port,

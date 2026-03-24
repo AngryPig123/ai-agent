@@ -23,11 +23,6 @@ class SearchBlogTool(BaseTool):
         self.blog_post_query_port = blog_post_query_port
         self.embed = embed
 
-    def build_input(self, state: dict[str, Any]) -> dict[str, Any]:
-        return {
-            "user_question": state["user_question"]
-        }
-
     def validate(self, input_data: dict[str, Any]) -> str | None:
         user_question = input_data.get("user_question")
 
@@ -57,18 +52,7 @@ class SearchBlogTool(BaseTool):
 
         posts = self.blog_post_query_port.find_by_blog_post_ids(blog_ids)
 
-        blog_posts = [
-            {
-                "title": post.title,
-                "description": post.description,
-                "source_path": post.source_path,
-                "tags_json": post.tags_json,
-                "content": post.content
-            }
-            for post in posts
-        ]
-
         return ToolResult(
             success=True,
-            data={"blog_posts": blog_posts}
+            data={"blog_posts": posts}
         )

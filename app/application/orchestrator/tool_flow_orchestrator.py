@@ -1,8 +1,9 @@
-from typing import Any
+import uuid
 
-from app.application.registry.tool_registry import ToolRegistry
-from app.application.router.tool.base_tool_router import BaseToolRouter
+from app.application.tool.agent_state import AgentState
 from app.application.tool.base_tool import ToolContext
+from app.application.tool.base_tool_router import BaseToolRouter
+from app.application.tool.tool_registry import ToolRegistry
 
 
 class ToolFlowOrchestrator:
@@ -17,14 +18,13 @@ class ToolFlowOrchestrator:
 
     def run(
             self,
-            initial_state: dict[str, Any],
+            initial_state: AgentState,
             agent_id: str,
             user_id: str,
             session_id: str,
-    ) -> dict[str, Any]:
+    ) -> AgentState:
 
-        state = dict(initial_state)
-        import uuid
+        state = initial_state
         context = ToolContext(
             agent_id=agent_id,
             user_id=user_id,

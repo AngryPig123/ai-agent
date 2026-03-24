@@ -2,18 +2,19 @@ from typing import Any
 
 from app.application.port.outbound.llm_port import LLMPort
 from app.application.tool.base_tool import BaseTool, ToolContext, ToolResult
+from app.domain.model.blog_post import BlogPost
 
 
-def prompt_builder(question: str, references: list[dict], summary: str) -> str:
+def prompt_builder(question: str, references: list[BlogPost], summary: str) -> str:
     formatted_refs = "\n".join([
         f"""
         [글 {i + 1}]
-        제목: {ref.get("title")}
-        내용: {ref.get("content")[:500]}
-        태그: {ref.get("tags_json")}
-        경로: {ref.get("source_path")}
+        제목: {ref.title}
+        내용: {ref.content}
+        태그: {ref.tags_json}
+        경로: {ref.source_path}
         """
-        for i, ref in enumerate(references)
+        for i, ref in references
     ])
 
     return f"""
@@ -57,13 +58,6 @@ class AnswerDraftTool(BaseTool):
 
     def __init__(self, llm: LLMPort):
         self.llm = llm
-
-    def build_input(self, state: dict[str, Any]) -> dict[str, Any]:
-        return {
-            "user_question": state["user_question"],
-            "blog_posts": state["blog_posts"],
-            "summary": state["summary"],
-        }
 
     def validate(self, input_data: dict[str, Any]) -> str | None:
         user_question = input_data["user_question"]

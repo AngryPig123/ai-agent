@@ -1,7 +1,8 @@
 from typing import Any
 
 from app.application.orchestrator.tool_flow_orchestrator import ToolFlowOrchestrator
-from app.application.port.inbound.sync_blog_answer_usecase import UserAnswerUseCase
+from app.application.tool.agent_state import AgentState
+from app.application.usecase.sync_blog_answer_usecase import UserAnswerUseCase
 
 
 class BlogAnswerService(UserAnswerUseCase):
@@ -12,7 +13,7 @@ class BlogAnswerService(UserAnswerUseCase):
     ):
         self.tool_flow_orchestrator = tool_flow_orchestrator
 
-    def execute(self, state: dict[str, Any]) -> str:
+    def execute(self, state: AgentState) -> str:
         agent_id = "blog-answer-agent"
         session_id = "blog-answer-session"
         user_id = "anonymous"
@@ -24,4 +25,4 @@ class BlogAnswerService(UserAnswerUseCase):
             session_id=session_id
         )
 
-        return state["answer"]
+        return state.answer
